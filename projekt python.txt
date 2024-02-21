@@ -5,15 +5,16 @@ import time
 import pygame
 from PIL import Image, ImageTk
 
-
+#playing sound
 def play_sound():
     pygame.mixer.init()
-    pygame.mixer.music.load("scarysound.mp3")
+    pygame.mixer.music.load("scarysound.mp3")   #path to sound file
     pygame.mixer.music.play()
 def select_word():
-    words = ["samochód", "wisielec", "gra", "słowo", "gitara"]
+    words = ["car", "hangman", "game", "word", "killer"]   #random words that are to guess
     return random.choice(words)
 
+#displaying guessed letters
 def displayedword(word, guessed_letters):
     display = ""
     for letter in word:
@@ -23,47 +24,52 @@ def displayedword(word, guessed_letters):
             display += "_ "
     return display
 
+#checking guess
 def check_guess():
     global tries
     guess = gueses.get().lower()
     canvas.itemconfig(guessed, text=f"Guessed letters: {guessed_letters}")
     if len(guess) != 1 or not guess.isalpha():
-        isgood.set("Proszę podaj pojedynczą literę.")
+        isgood.set("Please input one letter")
         return
 
     if guess in guessed_letters:
-        isgood.set("Już zgadłeś tę literę.")
+        isgood.set("You already guessed this letter.")
         return
 
     guessed_letters.append(guess)
 
     if guess in word_to_guess:
-        isgood.set("Poprawnie!")
+        isgood.set("Good!")
     else:
-        isgood.set("Niepoprawnie.")
+        isgood.set("Wrong")
         tries += 1
         canvas.itemconfig(triesdisplay, text=f"Tries: {tries}/6")
 
     worddisplay.set(displayedword(word_to_guess, guessed_letters))
 
+
     if "_" not in displayedword(word_to_guess, guessed_letters):
-        messagebox.showinfo("Gratulacje", f"Odgadłeś słowo: {word_to_guess}")
+        messagebox.showinfo("Gratulacje", f"You guessed word: {word_to_guess}")
         root.destroy()
+
+    #if user runs out of tries
     elif tries == MAX_TRIES:
         time.sleep(0.5)
         play_sound()
-        obraz = Image.open("scaryphoto.jpg")
+        obraz = Image.open("scaryphoto.jpg")    #displaying jumpscare
         obraz.show()
-        messagebox.showinfo("Koniec gry", f"Skończyły ci się próby. Szukane słowo to: {word_to_guess}")
+        messagebox.showinfo("You lost", f"You run out of tries. The word is: {word_to_guess}")
         time.sleep(3)
 
         root.destroy()
 
-MAX_TRIES = 6
+MAX_TRIES = 6       #number of max guesses of letters
 word_to_guess = select_word()
 guessed_letters = []
 tries = 0
 
+#properties of window
 root = tk.Tk()
 root.title("Hangman")
 root.geometry("500x500")
