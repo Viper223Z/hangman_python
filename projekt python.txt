@@ -1,0 +1,94 @@
+import random
+import tkinter as tk
+from tkinter import messagebox
+import time
+import pygame
+from PIL import Image, ImageTk
+
+
+def play_sound():
+    pygame.mixer.init()
+    pygame.mixer.music.load("scarysound.mp3")
+    pygame.mixer.music.play()
+def select_word():
+    words = ["samochód", "wisielec", "gra", "słowo", "gitara"]
+    return random.choice(words)
+
+def displayedword(word, guessed_letters):
+    display = ""
+    for letter in word:
+        if letter in guessed_letters:
+            display += letter
+        else:
+            display += "_ "
+    return display
+
+def check_guess():
+    global tries
+    guess = gueses.get().lower()
+    canvas.itemconfig(guessed, text=f"Guessed letters: {guessed_letters}")
+    if len(guess) != 1 or not guess.isalpha():
+        isgood.set("Proszę podaj pojedynczą literę.")
+        return
+
+    if guess in guessed_letters:
+        isgood.set("Już zgadłeś tę literę.")
+        return
+
+    guessed_letters.append(guess)
+
+    if guess in word_to_guess:
+        isgood.set("Poprawnie!")
+    else:
+        isgood.set("Niepoprawnie.")
+        tries += 1
+        canvas.itemconfig(triesdisplay, text=f"Tries: {tries}/6")
+
+    worddisplay.set(displayedword(word_to_guess, guessed_letters))
+
+    if "_" not in displayedword(word_to_guess, guessed_letters):
+        messagebox.showinfo("Gratulacje", f"Odgadłeś słowo: {word_to_guess}")
+        root.destroy()
+    elif tries == MAX_TRIES:
+        time.sleep(0.5)
+        play_sound()
+        obraz = Image.open("scaryphoto.jpg")
+        obraz.show()
+        messagebox.showinfo("Koniec gry", f"Skończyły ci się próby. Szukane słowo to: {word_to_guess}")
+        time.sleep(3)
+
+        root.destroy()
+
+MAX_TRIES = 6
+word_to_guess = select_word()
+guessed_letters = []
+tries = 0
+
+root = tk.Tk()
+root.title("Hangman")
+root.geometry("500x500")
+root.configure(bg="black")
+
+canvas = tk.Canvas(root, width=300, height=300, bg="black", highlightthickness=0)
+canvas.pack(pady=10)
+
+worddisplay = tk.StringVar()
+worddisplay.set(displayedword(word_to_guess, guessed_letters))
+displayedword1 = tk.Label(root, textvariable=worddisplay, fg="white", bg="black", font=("Arial", 20))
+displayedword1.pack()
+
+gueses = tk.Entry(root, font=("Arial", 14))
+gueses.pack(pady=10)
+
+butt = tk.Button(root, text="Guess", command=check_guess)
+butt.pack()
+
+isgood = tk.StringVar()
+correctornot = tk.Label(root, textvariable=isgood, fg="white", bg="black")
+correctornot.pack()
+
+canvas.create_text(150, 20, text=f"Hangman", fill="white", font=("Arial", 20))
+triesdisplay = canvas.create_text(150, 60, text=f"Tries: {tries}/{MAX_TRIES}", fill="white", font=("Arial", 12))
+guessed = canvas.create_text(150, 90, text=f"Guessed letters: {guessed_letters}", fill="white", font=("Arial", 12))
+
+root.mainloop()
